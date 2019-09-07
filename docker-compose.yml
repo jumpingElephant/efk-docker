@@ -2,8 +2,8 @@
 version: '2.4'
 services:
     elasticsearch:
-        image: ${ELASTICSEARCH_IMAGE}
-        restart: always
+        image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.0
+#        restart: always
         environment:
             - 'node.name=HEYJUDE'
             - 'discovery.type=single-node'
@@ -12,10 +12,10 @@ services:
         ports:
             - 9200:9200
 #            - 9300:9300
-        volumes:
-            - type: bind
-              source: /var/lib/elasticsearch
-              target: /usr/share/elasticsearch/data
+#        volumes:
+#            - type: bind
+#              source: /var/lib/elasticsearch
+#              target: /usr/share/elasticsearch/data
         networks:
             - net
         logging:
@@ -28,8 +28,8 @@ services:
                 tag: ${LOG_OPT_TAG_PREFIX}.efk.elasticsearch
 
     kibana:
-        image: ${KIBANA_IMAGE}
-        restart: always
+        image: docker.elastic.co/kibana/kibana-oss:6.3.0
+#        restart: always
 #        ports:
 #            - 5601:5601
         networks:
@@ -46,7 +46,7 @@ services:
                 tag: ${LOG_OPT_TAG_PREFIX}.efk.kibana
 
     fluentd:
-        image: ${FLUENTD_IMAGE}
+        image: qqbuby/fluentd:v1.2-es
         ports:
             - 127.0.0.1:24224:24224
 #            - 24224:24224/udp
@@ -61,8 +61,8 @@ services:
                 max-file: "2"
 
     nginx:
-        image: ${NGINX_IMAGE}
-        restart: always
+        image: nginx:1.13
+#        restart: always
         ports:
             - 80:80
         volumes:
