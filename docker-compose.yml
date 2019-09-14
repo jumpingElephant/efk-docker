@@ -3,7 +3,6 @@ version: '2.4'
 services:
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.0
-#        restart: always
         environment:
             - 'node.name=HEYJUDE'
             - 'discovery.type=single-node'
@@ -29,9 +28,8 @@ services:
 
     kibana:
         image: docker.elastic.co/kibana/kibana-oss:6.3.0
-#        restart: always
-#        ports:
-#            - 5601:5601
+        ports:
+            - 5601:5601
         networks:
             - net
         depends_on:
@@ -60,24 +58,12 @@ services:
                 max-size: "1G"
                 max-file: "2"
 
-    nginx:
-        image: nginx:1.13
-#        restart: always
+    simple-web:
+        image: alex/simple-web
         ports:
-            - 80:80
-        volumes:
-            - type: bind
-              source: ./nginx/nginx.conf
-              target: /etc/nginx/nginx.conf
-              read_only: true
-            - type: bind
-              source: ./nginx/conf.d
-              target: /etc/nginx/conf.d
-              read_only: true
+          - 81:80
         networks:
-            - net
-        depends_on:
-            - kibana
+          - net
         logging:
             driver: fluentd
             options:
@@ -85,7 +71,8 @@ services:
                 fluentd-async-connect: 'true'
                 fluentd-retry-wait: '1s'
                 fluentd-max-retries: '30'
-                tag: ${LOG_OPT_TAG_PREFIX}.efk.nginx
+                tag: ${LOG_OPT_TAG_PREFIX}.efk.simple-web
+
 networks:
     net:
         driver: bridge
