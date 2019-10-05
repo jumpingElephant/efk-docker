@@ -1,78 +1,78 @@
----
-version: '2.4'
+version: '3.7'
 services:
-    elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.0
-        environment:
-            - 'node.name=HEYJUDE'
-            - 'discovery.type=single-node'
-            - 'bootstrap.memory_lock=true'
-            - 'ES_JAVA_OPTS=-Xms256m -Xmx256m'
-        ports:
-            - 9200:9200
-#            - 9300:9300
-#        volumes:
-#            - type: bind
-#              source: /var/lib/elasticsearch
-#              target: /usr/share/elasticsearch/data
-        networks:
-            - net
-        logging:
-            driver: fluentd
-            options:
-                fluentd-address: localhost:24224
-                fluentd-async-connect: 'true'
-                fluentd-retry-wait: '1s'
-                fluentd-max-retries: '30'
-                tag: ${LOG_OPT_TAG_PREFIX}.efk.elasticsearch
+  elasticsearch:
+    image: elasticsearch:7.4.0
+    environment:
+      - 'node.name=HEYJUDE'
+      - 'discovery.type=single-node'
+      - 'bootstrap.memory_lock=true'
+      - 'ES_JAVA_OPTS=-Xms256m -Xmx256m'
+    ports:
+      - 9200:9200
+    #            - 9300:9300
+    #        volumes:
+    #            - type: bind
+    #              source: /var/lib/elasticsearch
+    #              target: /usr/share/elasticsearch/data
+    networks:
+      - net
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 'true'
+        fluentd-retry-wait: '1s'
+        fluentd-max-retries: '30'
+        tag: ${LOG_OPT_TAG_PREFIX}.efk.elasticsearch
 
-    kibana:
-        image: docker.elastic.co/kibana/kibana-oss:6.3.0
-        ports:
-            - 5601:5601
-        networks:
-            - net
-        depends_on:
-            - elasticsearch
-        logging:
-            driver: fluentd
-            options:
-                fluentd-address: localhost:24224
-                fluentd-async-connect: 'true'
-                fluentd-retry-wait: '1s'
-                fluentd-max-retries: '30'
-                tag: ${LOG_OPT_TAG_PREFIX}.efk.kibana
+  kibana:
+    image: kibana:7.4.0
+    ports:
+      - 5601:5601
+    networks:
+      - net
+    depends_on:
+      - elasticsearch
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 'true'
+        fluentd-retry-wait: '1s'
+        fluentd-max-retries: '30'
+        tag: ${LOG_OPT_TAG_PREFIX}.efk.kibana
 
-    fluentd:
-        image: qqbuby/fluentd:v1.2-es
-        ports:
-            - 127.0.0.1:24224:24224
-#            - 24224:24224/udp
-        volumes:
-            - ./fluentd/etc:/fluentd/etc
-        networks:
-            - net
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "1G"
-                max-file: "2"
+  fluentd:
+    image: fluentd:v1.6.2-1.0
+    user: fluentd
+    ports:
+      - 24224:24224
+      - 24224:24224/udp
+    volumes:
+      - ./fluentd/etc:/fluentd/etc
+    networks:
+      - net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1G"
+        max-file: "2"
 
-    simple-web:
-        image: alex/simple-web
-        ports:
-          - 81:80
-        networks:
-          - net
-        logging:
-            driver: fluentd
-            options:
-                fluentd-address: localhost:24224
-                fluentd-async-connect: 'true'
-                fluentd-retry-wait: '1s'
-                fluentd-max-retries: '30'
-                tag: ${LOG_OPT_TAG_PREFIX}.efk.simple-web
+  simple-web:
+    image: alex/simple-web
+    ports:
+      - 81:80
+    networks:
+      - net
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async-connect: 'true'
+        fluentd-retry-wait: '1s'
+        fluentd-max-retries: '30'
+        tag: ${LOG_OPT_TAG_PREFIX}.efk.simple-web
 
 networks:
-    net:
-        driver: bridge
+  net:
+    driver: bridge
